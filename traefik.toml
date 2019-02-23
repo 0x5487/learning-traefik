@@ -1,0 +1,43 @@
+debug = false
+logLevel = "INFO"
+defaultEntryPoints = ["http"]
+
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+
+[retry]
+
+[docker]
+  endpoint = "unix:///var/run/docker.sock"
+  domain = "my-awesome-app.org"
+  watch = true
+  exposedByDefault = false
+
+[api]
+  dashboard = true
+
+# Metrics definition
+[metrics]
+  # To enable Traefik to export internal metrics to Prometheus
+  [metrics.prometheus]
+    # Name of the related entry point
+    entryPoint = "traefik"
+
+    # Buckets for latency metrics
+    buckets = [0.1,0.3,1.2,5.0]
+
+# Tracing definition
+[tracing]
+  backend = "jaeger"
+  serviceName = "traefik" 
+  spanNameLimit = 0
+  [tracing.jaeger]
+    samplingServerURL = "http://localhost:5778/sampling"
+    samplingType = "const"
+    samplingParam = 1.0
+    localAgentHostPort = "127.0.0.1:6831"
+    traceContextHeaderName = "uber-trace-id"
+
+
+

@@ -1,14 +1,16 @@
 version: "3"
 services:
   traefik: 
-    command: "--web --docker --logLevel=DEBUG"
+    command: "--web --docker --logLevel=INFO"
     image: traefik
     ports: 
       - "80:80"
       - "8080:8080"
+    labels:
+      - traefik.frontend.auth.forward.address=http://192.168.1.3:16000/auth
     volumes: 
       - "/var/run/docker.sock:/var/run/docker.sock"
-      #- "/dev/null:/traefik.toml"
+      - ./traefik.toml:/traefik.toml
   whitemos: 
     image: jasonsoft/whitemos
     ports: 
@@ -27,7 +29,9 @@ services:
     labels: 
       - "traefik.enable=true"
       - traefik.backend=whoami2
-      - "traefik.frontend.rule=PathPrefixStrip:/test2"
+      - "traefik.frontend.rule=Path:/test2"
+      - traefik.frontend.auth.forward.address=http://192.168.1.3:16000/auth
+      - "traefik.frontend.auth.forward.authResponseHeaders=X-Auth-JWT"
   nginx: 
     image: nginx
     ports: 
