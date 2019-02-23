@@ -1,0 +1,38 @@
+version: "3"
+services:
+  traefik: 
+    command: "--web --docker --logLevel=DEBUG"
+    image: traefik
+    ports: 
+      - "80:80"
+      - "8080:8080"
+    volumes: 
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      #- "/dev/null:/traefik.toml"
+  whitemos: 
+    image: jasonsoft/whitemos
+    ports: 
+      - "10080:10080"
+    labels: 
+      - "traefik.enable=true"
+      - traefik.backend=whoami
+      - "traefik.frontend.rule=PathPrefixStrip:/test1"
+      - "traefik.frontend.rateLimit.extractorFunc=client.ip"
+      # 五秒三個 Requests
+      - "traefik.frontend.rateLimit.rateSet.r1.period=5s"
+      - "traefik.frontend.rateLimit.rateSet.r1.average=1"
+      - "traefik.frontend.rateLimit.rateSet.r1.burst=3"
+  whoami2: 
+    image: emilevauge/whoami
+    labels: 
+      - "traefik.enable=true"
+      - traefik.backend=whoami2
+      - "traefik.frontend.rule=PathPrefixStrip:/test2"
+  nginx: 
+    image: nginx
+    ports: 
+      - "10066:80"
+    labels: 
+      - "traefik.enable=true"
+      - traefik.backend=nginx
+      - "traefik.frontend.rule=PathPrefixStrip:/test3"
